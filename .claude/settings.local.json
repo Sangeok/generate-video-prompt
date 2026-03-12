@@ -2,7 +2,12 @@
   "permissions": {
     "allow": [
       "Bash(cd \"c:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npx tsc --noEmit 2>&1 | head -60)",
-      "Bash(cd \"c:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npx tsc --noEmit 2>&1)"
+      "Bash(cd \"c:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npx tsc --noEmit 2>&1)",
+      "Skill(claude-api)",
+      "Bash(cd \"C:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npm install @anthropic-ai/sdk)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(cd \"C:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npx tsc --noEmit 2>&1)"
     ]
   }
 }

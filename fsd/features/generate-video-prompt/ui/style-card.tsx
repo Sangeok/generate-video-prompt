@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { CheckCircle2 } from "lucide-react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/fsd/shared/lib/utils";
 
 import type { StyleOption, VideoStyle } from "../model/types";
 
