@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 
-import { Toaster } from "@/components/ui/sonner";
+import { Toaster } from "@/fsd/shared/ui/sonner";
+import { Providers } from "@/fsd/app/providers";
 
 import "./globals.css";
 
@@ -30,8 +31,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950 text-white min-h-screen scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-700 hover:scrollbar-thumb-neutral-500`}
       >
-        {children}
-        <Toaster position="top-center" richColors theme="dark" />
+        <Providers>
+          {children}
+          <Toaster position="top-center" richColors theme="dark" />
+        </Providers>
       </body>
     </html>
   );

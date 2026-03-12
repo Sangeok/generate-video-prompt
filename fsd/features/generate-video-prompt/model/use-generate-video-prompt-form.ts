@@ -9,12 +9,11 @@ import {
   generateVideoPromptSchema,
   type GenerateVideoPromptInput,
 } from "./generate-video-prompt-schema";
-
-function submitGenerateVideoPrompt(input: GenerateVideoPromptInput) {
-  console.log("Generate prompt placeholder:", input);
-}
+import { useGenerateImageScriptMutation } from "./use-generate-image-script-mutation";
 
 export function useGenerateVideoPromptForm() {
+  const { mutate, isPending, data } = useGenerateImageScriptMutation();
+
   const form = useForm<GenerateVideoPromptInput>({
     resolver: zodResolver(generateVideoPromptSchema),
     mode: "onChange",
@@ -25,14 +24,9 @@ export function useGenerateVideoPromptForm() {
   });
 
   const onSubmit = (data: GenerateVideoPromptInput) => {
-    submitGenerateVideoPrompt(data);
-    const topicPreview =
-      data.topic.length > 48
-        ? `${data.topic.slice(0, 48).trimEnd()}...`
-        : data.topic;
-
-    toast.success("Prompt payload is ready.", {
-      description: `${data.selectedStyle} style for "${topicPreview}"`,
+    mutate({
+      scene_description: data.topic,
+      videoStyle: data.selectedStyle,
     });
   };
 
@@ -58,5 +52,7 @@ export function useGenerateVideoPromptForm() {
   return {
     form,
     handleSubmit: form.handleSubmit(onSubmit, onError),
+    isPending,
+    result: data,
   };
 }
