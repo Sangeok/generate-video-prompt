@@ -1,7 +1,5 @@
-export default function Home() {
-  return (
-    <div>
-    
-    </div>
-  );
+import { HomePage } from "@/fsd/pages/home";
+
+export default function Page() {
+  return <HomePage />;
 }
