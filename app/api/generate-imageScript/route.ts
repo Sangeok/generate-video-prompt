@@ -93,6 +93,7 @@ export async function POST(req: Request) {
 
   const response = result?.response?.text();
 
+  // output example
   // {
   // "prompt": "Hyperrealistic 3D CGI human skeleton character with photorealistic aged bone texture, detailed rib cage and spine articulation, skull with natural proportions.\n\nWearing a dark athletic headband and black gym shorts draped over the skeleton frame.\n\nSitting by the window and drinking an Americano, with a realistic ceramic coffee cup.\n\nCozy café interior near a bright window, natural window light contrasting against the cold bone texture. Overall mood: calm and lyrical.\n\nCinematic lighting with soft directional shadows, desaturated color grade, shallow depth of field (f/2.8), Eye level, medium close-up, high-end CGI photorealistic render, 8K resolution."
   // }
