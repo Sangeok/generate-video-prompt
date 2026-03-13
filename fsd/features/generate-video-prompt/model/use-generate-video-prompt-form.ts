@@ -10,9 +10,11 @@ import {
   type GenerateVideoPromptInput,
 } from "./generate-video-prompt-schema";
 import { useGenerateImageScriptMutation } from "./use-generate-image-script-mutation";
+import { useGenerateYoutubeScriptMutation } from "./use-generate-youtube-script-mutation";
 
 export function useGenerateVideoPromptForm() {
-  const { mutate, isPending, data } = useGenerateImageScriptMutation();
+  // const { mutate, isPending, data } = useGenerateImageScriptMutation();
+  const { mutate, isPending, data } = useGenerateYoutubeScriptMutation();
 
   const form = useForm<GenerateVideoPromptInput>({
     resolver: zodResolver(generateVideoPromptSchema),
@@ -23,9 +25,18 @@ export function useGenerateVideoPromptForm() {
     },
   });
 
+  // for creating image script
+  // const onSubmit = (data: GenerateVideoPromptInput) => {
+  //   mutate({
+  //     scene_description: data.topic,
+  //     videoStyle: data.selectedStyle,
+  //   });
+  // };
+
+  // for creating youtube script
   const onSubmit = (data: GenerateVideoPromptInput) => {
     mutate({
-      scene_description: data.topic,
+      topic: data.topic,
       videoStyle: data.selectedStyle,
     });
   };
