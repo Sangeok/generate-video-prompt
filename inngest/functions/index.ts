@@ -3,6 +3,8 @@ import { createChatSession } from "../../app/api/lib/ai-model";
 import { parseGeminiJsonResponse } from "../../app/api/lib/parse-gemini";
 import { SCRIPT_PROMPT_EN } from "../../app/api/generate-youtubeScript/route";
 import { SKELETON_BATCH_PROMPT_GENERATOR } from "../../app/api/generate-imageScript/route";
+import { generateTTSBuffer } from "../../app/api/lib/tts";
+import { generateCaptionFromBuffer } from "../../app/api/lib/caption";
 
 export const createVideoPrompt = inngest.createFunction(
   { id: "create-video-prompt" },
@@ -30,20 +32,36 @@ export const createVideoPrompt = inngest.createFunction(
       return parsed;
     });
 
-    const imageResult = await step.run("generate-all-image-prompts", async () => {
-      const sceneList = scriptResult.scenes
-        .map((s: string, i: number) => `${i + 1}. ${s}`)
-        .join("\n");
-      const session = createChatSession();
-      const res = await session.sendMessage(
-        SKELETON_BATCH_PROMPT_GENERATOR.replace("{scenes}", sceneList)
-      );
-      return parseGeminiJsonResponse<{ prompts: string[] }>(res.response.text());
+    // Step 2 + 3: 이미지 프롬프트 & TTS 병렬 실행
+    const [imageResult, audioBase64] = await Promise.all([
+      step.run("generate-all-image-prompts", async () => {
+        const sceneList = scriptResult.scenes
+          .map((s: string, i: number) => `${i + 1}. ${s}`)
+          .join("\n");
+        const session = createChatSession();
+        const res = await session.sendMessage(
+          SKELETON_BATCH_PROMPT_GENERATOR.replace("{scenes}", sceneList)
+        );
+        return parseGeminiJsonResponse<{ prompts: string[] }>(res.response.text());
+      }),
+
+      step.run("generate-tts-audio", async () => {
+        const buffer = await generateTTSBuffer(scriptResult.content);
+        return buffer.toString("base64");
+      }),
+    ]);
+
+    // Step 4: caption 생성 (audioBase64 의존, sequential)
+    const caption = await step.run("generate-caption", async () => {
+      const audioBuffer = Buffer.from(audioBase64, "base64");
+      return generateCaptionFromBuffer(audioBuffer);
     });
 
     return {
       script: scriptResult,
       imagePrompts: imageResult.prompts,
+      audioBase64,
+      caption,
     };
   },
 );
