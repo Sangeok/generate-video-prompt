@@ -10,9 +10,15 @@ import {
   type GenerateVideoPromptInput,
 } from "./generate-video-prompt-schema";
 import { useTriggerVideoPromptMutation } from "./use-trigger-video-prompt-mutation";
+import { useRunResultQuery } from "./use-run-result-query";
 
 export function useGenerateVideoPromptForm() {
-  const { mutate, isPending, data } = useTriggerVideoPromptMutation();
+  const { mutate, isPending, data: mutationData } = useTriggerVideoPromptMutation();
+  const { data: runResult, isFetching: isPolling } = useRunResultQuery(
+    mutationData?.eventId ?? null
+  );
+
+  console.log("runResult", runResult)
 
   const form = useForm<GenerateVideoPromptInput>({
     resolver: zodResolver(generateVideoPromptSchema),
@@ -53,6 +59,7 @@ export function useGenerateVideoPromptForm() {
     form,
     handleSubmit: form.handleSubmit(onSubmit, onError),
     isPending,
-    result: data,
+    isPolling,
+    runResult,
   };
 }

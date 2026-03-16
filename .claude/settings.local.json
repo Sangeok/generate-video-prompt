@@ -8,7 +8,12 @@
       "mcp__plugin_context7_context7__resolve-library-id",
       "mcp__plugin_context7_context7__query-docs",
       "Bash(cd \"C:/Users/hamso/OneDrive/Desktop/git/generate-video-prompt\" && npx tsc --noEmit 2>&1)",
-      "Bash(node -e \"const pkg = require\\('./node_modules/inngest/package.json'\\); console.log\\(pkg.version\\)\")"
+      "Bash(node -e \"const pkg = require\\('./node_modules/inngest/package.json'\\); console.log\\(pkg.version\\)\")",
+      "Bash(find:*)",
+      "WebFetch(domain:developers.deepgram.com)",
+      "Bash(ls:*)",
+      "Bash(cd:*)",
+      "Bash(grep:*)"
     ]
   }
 }

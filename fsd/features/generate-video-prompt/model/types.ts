@@ -11,3 +11,17 @@ export type StyleOption = {
   selectedClassName: string;
   iconClassName: string;
 };
+
+export type VideoPromptResult = {
+  script: { content: string; scenes: string[] };
+  imagePrompts: string[];
+  audioBase64: string;
+  caption: string;
+};
+
+export type RunStatus = "Running" | "Completed" | "Failed" | "Cancelled";
+
+export type InngestRun = {
+  status: RunStatus;
+  output?: VideoPromptResult;
+};
