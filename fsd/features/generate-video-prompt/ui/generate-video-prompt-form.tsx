@@ -4,6 +4,7 @@ import { Loader2, Sparkles } from "lucide-react";
 
 import { Button } from "@/fsd/shared/ui/button";
 import { Input } from "@/fsd/shared/ui/input";
+import { cn } from "@/fsd/shared/lib/utils";
 
 import { STYLE_OPTIONS } from "../config/style-options";
 import { useGenerateVideoPromptForm } from "../model/use-generate-video-prompt-form";
@@ -11,7 +12,7 @@ import { StyleCard } from "./style-card";
 import { VideoPromptResult } from "./video-prompt-result";
 
 export function GenerateVideoPromptForm() {
-  const { form, handleSubmit, isPending, isPolling, runResult } = useGenerateVideoPromptForm();
+  const { form, handleSubmit, isLoading, isPending, runResult } = useGenerateVideoPromptForm();
   const {
     register,
     watch,
@@ -19,7 +20,6 @@ export function GenerateVideoPromptForm() {
     formState: { isValid },
   } = form;
 
-  const isLoading = isPending || isPolling;
   const selectedStyle = watch("selectedStyle");
 
   return (
@@ -73,11 +73,12 @@ export function GenerateVideoPromptForm() {
             type="submit"
             disabled={isLoading}
             aria-disabled={!isValid || isLoading}
-            className={
+            className={cn(
+              "h-auto gap-3 rounded-xl px-8 py-4 text-lg font-bold transition-all duration-300",
               isValid && !isLoading
-                ? "h-auto gap-3 rounded-xl border-transparent bg-white px-8 py-4 text-lg font-bold text-neutral-950 shadow-[0_0_20px_rgba(255,255,255,0.3)] transition-all duration-300 hover:-translate-y-1 hover:bg-neutral-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
-                : "h-auto gap-3 rounded-xl border border-white/10 bg-white/5 px-8 py-4 text-lg font-bold text-neutral-300 transition-all duration-300 hover:bg-white/10"
-            }
+                ? "border-transparent bg-white text-neutral-950 shadow-[0_0_20px_rgba(255,255,255,0.3)] hover:-translate-y-1 hover:bg-neutral-200 hover:shadow-[0_0_30px_rgba(255,255,255,0.5)]"
+                : "border border-white/10 bg-white/5 text-neutral-300 hover:bg-white/10"
+            )}
           >
             {isLoading ? (
               <>
@@ -94,8 +95,21 @@ export function GenerateVideoPromptForm() {
         </div>
       </form>
 
-      {runResult?.status === "Completed" && runResult.output && (
+      {runResult?.status === "Completed" && (
         <VideoPromptResult result={runResult.output} />
+      )}
+      {runResult?.status === "Failed" && (
+        <div className="rounded-2xl border border-red-500/20 bg-red-500/5 p-6 text-center">
+          <p className="text-red-400">생성에 실패했습니다.</p>
+          {runResult.error && (
+            <p className="mt-1 text-sm text-red-400/70">{runResult.error}</p>
+          )}
+        </div>
+      )}
+      {runResult?.status === "Cancelled" && (
+        <div className="rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-6 text-center">
+          <p className="text-yellow-400">생성이 취소되었습니다.</p>
+        </div>
       )}
     </div>
   );

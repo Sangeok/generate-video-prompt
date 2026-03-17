@@ -1,24 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Copy, Check, Download, Music } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/fsd/shared/ui/button";
 import type { VideoPromptResult as VideoPromptResultType } from "../model/types";
 
-interface Props {
+interface VideoPromptResultProps {
   result: VideoPromptResultType;
 }
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => {
+    return () => clearTimeout(timerRef.current);
+  }, []);
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
-    setCopied(true);
-    toast.success("복사되었습니다.");
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("복사되었습니다.");
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
+    } catch {
+      toast.error("복사에 실패했습니다.");
+    }
   };
 
   return (
@@ -43,9 +52,11 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function VideoPromptResult({ result }: Props) {
-  const srtContent = `1\n00:00:00,000 --> 00:00:30,000\n${result.caption}`;
-  const audioSrc = `data:audio/mp3;base64,${result.audioBase64}`;
+const VIDEO_DURATION_SECONDS = 30;
+const AUDIO_MIME_TYPE = "audio/mp3";
+
+function CaptionSection({ caption }: { caption: string }) {
+  const srtContent = `1\n00:00:00,000 --> 00:00:${String(VIDEO_DURATION_SECONDS).padStart(2, "0")},000\n${caption}`;
 
   const handleSrtDownload = () => {
     const blob = new Blob([srtContent], { type: "text/plain" });
@@ -58,97 +69,118 @@ export function VideoPromptResult({ result }: Props) {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Caption / SRT */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionTitle>Caption (SRT)</SectionTitle>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={handleSrtDownload}
-            className="h-8 gap-1.5 rounded-lg border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 hover:text-white"
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <SectionTitle>Caption (SRT)</SectionTitle>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleSrtDownload}
+          className="h-8 gap-1.5 rounded-lg border-white/10 bg-white/5 px-3 text-xs text-white/70 hover:bg-white/10 hover:text-white"
+        >
+          <Download className="size-3" />
+          SRT 다운로드
+        </Button>
+      </div>
+      <pre className="overflow-auto rounded-xl bg-neutral-900/50 p-4 text-sm text-neutral-300 whitespace-pre-wrap">
+        {srtContent}
+      </pre>
+    </div>
+  );
+}
+
+function AudioSection({ audioBase64 }: { audioBase64: string }) {
+  const audioSrc = `data:${AUDIO_MIME_TYPE};base64,${audioBase64}`;
+
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <SectionTitle>Audio</SectionTitle>
+        <a
+          href={audioSrc}
+          download="audio.mp3"
+          className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white/70 transition-colors hover:bg-white/10 hover:text-white"
+        >
+          <Download className="size-3" />
+          MP3 다운로드
+        </a>
+      </div>
+      <div className="flex items-center gap-3">
+        <Music className="size-4 shrink-0 text-purple-400" />
+        <audio controls src={audioSrc} className="w-full" />
+      </div>
+    </div>
+  );
+}
+
+function ImagePromptsSection({ prompts }: { prompts: string[] }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div className="mb-3">
+        <SectionTitle>Image Prompts</SectionTitle>
+      </div>
+      <div className="space-y-3">
+        {prompts.map((prompt, i) => (
+          // 이미지 프롬프트는 순서가 고정되고 재정렬되지 않으므로 인덱스 key 허용
+          <div
+            key={i}
+            className="flex items-start justify-between gap-4 rounded-xl bg-neutral-900/50 p-4"
           >
-            <Download className="size-3" />
-            SRT 다운로드
-          </Button>
-        </div>
-        <pre className="overflow-auto rounded-xl bg-neutral-900/50 p-4 text-sm text-neutral-300 whitespace-pre-wrap">
-          {srtContent}
-        </pre>
+            <p className="text-sm text-neutral-300 leading-relaxed">{prompt}</p>
+            <CopyButton text={prompt} />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ScriptSection({ script }: { script: { content: string; scenes: string[] } }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
+      <div className="mb-3 flex items-center justify-between">
+        <SectionTitle>Script</SectionTitle>
+        <CopyButton text={script.content} />
       </div>
 
-      {/* Audio */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionTitle>Audio</SectionTitle>
-          <a
-            href={audioSrc}
-            download="audio.mp3"
-            className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 text-xs text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-          >
-            <Download className="size-3" />
-            MP3 다운로드
-          </a>
-        </div>
-        <div className="flex items-center gap-3">
-          <Music className="size-4 shrink-0 text-purple-400" />
-          <audio controls src={audioSrc} className="w-full" />
-        </div>
-      </div>
-
-      {/* Image Prompts */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <div className="mb-3">
-          <SectionTitle>Image Prompts</SectionTitle>
-        </div>
-        <div className="space-y-3">
-          {result.imagePrompts.map((prompt, i) => (
+      {script.scenes.length > 0 && (
+        <div className="mb-4 space-y-3">
+          {script.scenes.map((scene, i) => (
+            // 씬은 순서가 고정되고 재정렬되지 않으므로 인덱스 key 허용
             <div
               key={i}
               className="flex items-start justify-between gap-4 rounded-xl bg-neutral-900/50 p-4"
             >
-              <p className="text-sm text-neutral-300 leading-relaxed">{prompt}</p>
-              <CopyButton text={prompt} />
+              <div>
+                <span className="mb-1 block text-xs font-medium text-purple-400">
+                  Scene {i + 1}
+                </span>
+                <p className="text-sm text-neutral-300 leading-relaxed">{scene}</p>
+              </div>
+              <CopyButton text={scene} />
             </div>
           ))}
         </div>
+      )}
+
+      <div className="rounded-xl bg-neutral-900/50 p-4">
+        <p className="text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Full Script</p>
+        <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
+          {script.content}
+        </p>
       </div>
+    </div>
+  );
+}
 
-      {/* Script */}
-      <div className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-xl">
-        <div className="mb-3 flex items-center justify-between">
-          <SectionTitle>Script</SectionTitle>
-          <CopyButton text={result.script.content} />
-        </div>
-
-        {result.script.scenes.length > 0 && (
-          <div className="mb-4 space-y-3">
-            {result.script.scenes.map((scene, i) => (
-              <div
-                key={i}
-                className="flex items-start justify-between gap-4 rounded-xl bg-neutral-900/50 p-4"
-              >
-                <div>
-                  <span className="mb-1 block text-xs font-medium text-purple-400">
-                    Scene {i + 1}
-                  </span>
-                  <p className="text-sm text-neutral-300 leading-relaxed">{scene}</p>
-                </div>
-                <CopyButton text={scene} />
-              </div>
-            ))}
-          </div>
-        )}
-
-        <div className="rounded-xl bg-neutral-900/50 p-4">
-          <p className="text-xs font-medium text-white/50 mb-2 uppercase tracking-wider">Full Script</p>
-          <p className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap">
-            {result.script.content}
-          </p>
-        </div>
-      </div>
+export function VideoPromptResult({ result }: VideoPromptResultProps) {
+  return (
+    <div className="space-y-4">
+      <CaptionSection caption={result.caption} />
+      <AudioSection audioBase64={result.audioBase64} />
+      <ImagePromptsSection prompts={result.imagePrompts} />
+      <ScriptSection script={result.script} />
     </div>
   );
 }

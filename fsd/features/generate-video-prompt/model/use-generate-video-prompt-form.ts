@@ -18,8 +18,6 @@ export function useGenerateVideoPromptForm() {
     mutationData?.eventId ?? null
   );
 
-  console.log("runResult", runResult)
-
   const form = useForm<GenerateVideoPromptInput>({
     resolver: zodResolver(generateVideoPromptSchema),
     mode: "onChange",
@@ -55,11 +53,14 @@ export function useGenerateVideoPromptForm() {
     }
   };
 
+  // isPending: mutation 전송 중, isPolling: Inngest 파이프라인 결과 대기 중
+  const isLoading = isPending || isPolling;
+
   return {
     form,
     handleSubmit: form.handleSubmit(onSubmit, onError),
+    isLoading,
     isPending,
-    isPolling,
     runResult,
   };
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { inngest } from "@/inngest/client";
+import { inngest } from "@/fsd/shared/lib/inngest";
 import type { VideoStyle } from "../model/types";
 
 export async function triggerVideoPrompt(topic: string, videoStyle: VideoStyle) {

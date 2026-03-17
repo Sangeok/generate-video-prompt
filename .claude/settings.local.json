@@ -13,7 +13,15 @@
       "WebFetch(domain:developers.deepgram.com)",
       "Bash(ls:*)",
       "Bash(cd:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run:*)",
+      "Bash(npm list:*)",
+      "Bash(claude plugin:*)",
+      "Bash(git ls-remote:*)",
+      "Bash(mkdir:*)",
+      "Bash(npm uninstall:*)"
     ]
   }
 }

@@ -21,7 +21,8 @@ export type VideoPromptResult = {
 
 export type RunStatus = "Running" | "Completed" | "Failed" | "Cancelled";
 
-export type InngestRun = {
-  status: RunStatus;
-  output?: VideoPromptResult;
-};
+export type InngestRun =
+  | { status: "Running" }
+  | { status: "Completed"; output: VideoPromptResult }
+  | { status: "Failed"; error?: string }
+  | { status: "Cancelled" };

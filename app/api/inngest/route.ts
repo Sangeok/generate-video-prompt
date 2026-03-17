@@ -1,8 +1,7 @@
 import { serve } from "inngest/next";
-import { inngest } from "../../../inngest/client";
-import { createVideoPrompt } from "@/inngest/functions";
+import { inngest } from "@/fsd/shared/lib/inngest";
+import { createVideoPrompt } from "@/fsd/features/generate-video-prompt";
 
-// Create an API that serves zero functions
 export const { GET, POST, PUT } = serve({
   client: inngest,
   functions: [
